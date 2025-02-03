@@ -1,8 +1,4 @@
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
-import {
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
 import { Task, TaskStatus } from "@/types";
 import { TaskList } from "@/components";
 import { useMemo } from "react";
@@ -18,7 +14,9 @@ export function KanbanBoard(props: Readonly<KanbanBoardProps>) {
 
   const onDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
-    if (!over) return;
+    if (!over) {
+      return;
+    }
 
     const draggedTaskId = active.id.toString();
     const newStatus = over.id as TaskStatus;
@@ -26,44 +24,27 @@ export function KanbanBoard(props: Readonly<KanbanBoardProps>) {
     moveTask(draggedTaskId, newStatus);
   };
 
-  const todoTask = useMemo(
-    () => tasks.filter((t) => t.status === "todo"),
-    [tasks]
-  );
-  const inProgressTask = useMemo(
-    () => tasks.filter((t) => t.status === "in-progress"),
-    [tasks]
-  );
-  const doneTask = useMemo(
-    () => tasks.filter((t) => t.status === "done"),
-    [tasks]
-  );
+  const taskGroups = useMemo(() => {
+    return tasks.reduce(
+      (acc, task) => {
+        acc[task.status].push(task);
+        return acc;
+      },
+      { todo: [], "in-progress": [], done: [] } as Record<TaskStatus, Task[]>
+    );
+  }, [tasks]);
 
   return (
     <DndContext onDragEnd={onDragEnd}>
       <div className="w-full flex flex-col md:flex-row items-start gap-4 p-4">
-        <SortableContext
-          items={todoTask}
-          strategy={verticalListSortingStrategy}
-        >
-          <TaskList variant={"todo"} tasks={todoTask} onAddTask={addTask} />
-        </SortableContext>
-        <SortableContext
-          items={inProgressTask}
-          strategy={verticalListSortingStrategy}
-        >
+        {(["todo", "in-progress", "done"] as TaskStatus[]).map((status) => (
           <TaskList
-            variant={"in-progress"}
-            tasks={inProgressTask}
+            key={status}
+            variant={status}
+            tasks={taskGroups[status]}
             onAddTask={addTask}
           />
-        </SortableContext>
-        <SortableContext
-          items={doneTask}
-          strategy={verticalListSortingStrategy}
-        >
-          <TaskList variant={"done"} tasks={doneTask} onAddTask={addTask} />
-        </SortableContext>
+        ))}
       </div>
     </DndContext>
   );

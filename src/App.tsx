@@ -1,7 +1,12 @@
 import "./App.css";
 
+import { KanbanBoard } from "@/components/KanbanBoard/KanbanBoard";
+import { useTask } from "@/store";
+
 function App() {
-  return <h1>Hello World</h1>;
+  const tasks = useTask();
+
+  return <KanbanBoard tasks={tasks} />;
 }
 
 export default App;

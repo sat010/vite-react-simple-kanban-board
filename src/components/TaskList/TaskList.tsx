@@ -39,19 +39,22 @@ export function TaskList(props: Readonly<TaskListProps>) {
   const inputRef = useRef<HTMLInputElement>(null);
   const headerInputRef = useRef<HTMLInputElement>(null);
 
+  const hideInput = () => {
+    setShowAdd(false);
+    setShowHeaderAdd(false);
+    setTaskTitle("");
+  };
+
   const addTask = () => {
     if (taskTitle.trim() && onAddTask) {
       onAddTask(taskTitle, variant);
-      setTaskTitle("");
     }
-    setShowAdd(false);
+    hideInput();
   };
 
   const blur = (event: React.FocusEvent<HTMLInputElement>) => {
     if (!event.relatedTarget) {
-      setShowAdd(false);
-      setShowHeaderAdd(false);
-      setTaskTitle("");
+      hideInput();
     }
   };
 
@@ -72,13 +75,15 @@ export function TaskList(props: Readonly<TaskListProps>) {
           </div>
           <span>{tasks.length}</span>
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setShowHeaderAdd(true)}
-        >
-          <Plus className="w-5 h-5" />
-        </Button>
+        {variant === "todo" && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setShowHeaderAdd(true)}
+          >
+            <Plus className="w-5 h-5" />
+          </Button>
+        )}
       </CardHeader>
 
       <CardContent className="p-1 flex flex-col gap-2 items-start">
@@ -97,27 +102,29 @@ export function TaskList(props: Readonly<TaskListProps>) {
           <Task key={task.id} task={task} />
         ))}
       </CardContent>
-      <CardFooter className="p-1">
-        {showAdd ? (
-          <Input
-            ref={inputRef}
-            autoFocus
-            value={taskTitle}
-            onChange={(e) => setTaskTitle(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addTask()}
-            onBlur={blur}
-            placeholder="Task title"
-          />
-        ) : (
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => setShowAdd(true)}
-          >
-            <Plus className="w-4 h-4 mr-2" /> Add Task
-          </Button>
-        )}
-      </CardFooter>
+      {variant === "todo" && (
+        <CardFooter className="p-1">
+          {showAdd ? (
+            <Input
+              ref={inputRef}
+              autoFocus
+              value={taskTitle}
+              onChange={(e) => setTaskTitle(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && addTask()}
+              onBlur={blur}
+              placeholder="Task title"
+            />
+          ) : (
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => setShowAdd(true)}
+            >
+              <Plus className="w-4 h-4 mr-2" /> Add Task
+            </Button>
+          )}
+        </CardFooter>
+      )}
     </Card>
   );
 }

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { persist, createJSONStorage } from "zustand/middleware";
 import { Task, TaskStatus } from "@/types";
 import { nanoid } from "nanoid";
 
@@ -30,6 +30,13 @@ export const useTaskStore = create<TaskState>()(
     }),
     {
       name: "tasks-storage",
+      storage: createJSONStorage(() => localStorage),
+      partialize: (state) => {
+        const action = Object.fromEntries(
+          Object.entries(state).filter(([key]) => !["actions"].includes(key))
+        );
+        return action;
+      },
     }
   )
 );
